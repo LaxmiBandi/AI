@@ -1,0 +1,66 @@
+# Vacuum Cleaner AI Lab - Manual Control
+# Both Room A and Room B are dirty at start
+
+# Environment Setup
+environment = {
+    'A': 'dirty',
+    'B': 'dirty',
+    'current': 'A'  # Start in Room A
+}
+
+def display_environment(env):
+    print("\n--- Environment Status ---")
+    print(f"Room A: {env['A']}")
+    print(f"Room B: {env['B']}")
+    print(f"Vacuum is in Room: {env['current']}")
+    print("---------------------------")
+
+def user_controlled_agent(env):
+    score = 0
+    steps = 0
+
+    while True:
+        display_environment(env)
+
+        print("\nChoose an action:")
+        print("1. Suck (Clean the room)")
+        print("2. Move Left (Go to Room A)")
+        print("3. Move Right (Go to Room B)")
+        print("4. Exit")
+
+        choice = input("Enter your choice (1-4): ").strip()
+
+        if choice == '1':
+            current_room = env['current']
+            if env[current_room] == 'dirty':
+                print(f"🧹 Cleaning Room {current_room}...")
+                env[current_room] = 'clean'
+                score += 10
+            else:
+                print(f"✅ Room {current_room} is already clean.")
+        elif choice == '2':
+            env['current'] = 'A'
+            print("🚶 Moved to Room A.")
+        elif choice == '3':
+            env['current'] = 'B'
+            print("🚶 Moved to Room B.")
+        elif choice == '4':
+            print("\n👋 Exiting simulation.")
+            break
+        else:
+            print("❌ Invalid choice. Please enter 1-4.")
+            continue
+
+        steps += 1
+
+        # Check if both rooms are clean
+        if env['A'] == 'clean' and env['B'] == 'clean':
+            print("\n✅✅ Both rooms are clean! Task complete.")
+            break
+
+    print(f"\nTotal Steps Taken: {steps}")
+    print(f"Final Score: {score}")
+
+# Start the simulation
+print("=== Vacuum Cleaner AI Lab - Manual Mode ===")
+user_controlled_agent(environment)
