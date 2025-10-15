@@ -1,0 +1,67 @@
+# Define initial facts as a set of strings
+facts = {
+    "American(Robert)",
+    "Enemy(A, America)",
+    "Owns(A, T1)",
+    "Missile(T1)"
+}
+
+# Define rules as tuples: (set of premises, conclusion)
+rules = [
+    # Crime rule
+    ({"American(p)", "Weapon(q)", "Sells(p, q, r)", "Hostile(r)"}, "Criminal(p)"),
+    # Missile to weapon
+    ({"Missile(x)"}, "Weapon(x)"),
+    # Sales rule
+    ({"Missile(x)", "Owns(A, x)"}, "Sells(Robert, x, A)"),
+    # Hostility rule
+    ({"Enemy(x, America)"}, "Hostile(x)")
+]
+
+# Since we have variables (x, p, q, r), we'll do simple pattern matching and instantiation for this example
+
+def instantiate(rule, facts):
+    premises, conclusion = rule
+    new_facts = set()
+
+    # For this specific problem, manually instantiate variables based on known facts
+    # Instantiate Missile(x), Owns(A, x) with x = T1
+    if premises == {"Missile(x)", "Owns(A, x)"}:
+        if "Missile(T1)" in facts and "Owns(A, T1)" in facts:
+            new_facts.add("Sells(Robert, T1, A)")
+    # Instantiate Enemy(x, America) with x = A
+    elif premises == {"Enemy(x, America)"}:
+        if "Enemy(A, America)" in facts:
+            new_facts.add("Hostile(A)")
+    # Instantiate Missile(x) -> Weapon(x) with x = T1
+    elif premises == {"Missile(x)"}:
+        if "Missile(T1)" in facts:
+            new_facts.add("Weapon(T1)")
+    # Instantiate crime rule
+    elif premises == {"American(p)", "Weapon(q)", "Sells(p, q, r)", "Hostile(r)"}:
+        if ("American(Robert)" in facts and
+            "Weapon(T1)" in facts and
+            "Sells(Robert, T1, A)" in facts and
+            "Hostile(A)" in facts):
+            new_facts.add("Criminal(Robert)")
+    return new_facts
+
+
+def forward_chaining(facts, rules, goal):
+    known = set(facts)
+    while True:
+        new_facts = set()
+        for rule in rules:
+            inferred = instantiate(rule, known)
+            new_facts |= inferred
+        if goal in known or goal in new_facts:
+            return True
+        if new_facts.issubset(known):
+            return False
+        known |= new_facts
+
+
+goal = "Criminal(Robert)"
+
+result = forward_chaining(facts, rules, goal)
+print("Goal reached:", result)
