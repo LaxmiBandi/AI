@@ -1,0 +1,54 @@
+import math
+import random
+
+# Objective function to minimize
+def objective_function(x):
+    return x**2 + 10 * math.sin(x)
+
+# Simulated Annealing
+def simulated_annealing(objective, bounds, temp, cooling_rate, max_iter):
+    # Random initial solution
+    current_x = random.uniform(bounds[0], bounds[1])
+    current_energy = objective(current_x)
+
+    best_x, best_energy = current_x, current_energy
+
+    print("Initial solution: x =", round(current_x, 4), "f(x) =", round(current_energy, 4))
+
+    for i in range(max_iter):
+        # Generate a new candidate by random small change
+        candidate_x = current_x + random.uniform(-1, 1)
+        candidate_x = max(min(candidate_x, bounds[1]), bounds[0])  # keep inside bounds
+        candidate_energy = objective(candidate_x)
+
+        # Calculate energy difference
+        diff = candidate_energy - current_energy
+
+        # Accept if better, or with probability if worse
+        if diff < 0 or random.random() < math.exp(-diff / temp):
+            current_x, current_energy = candidate_x, candidate_energy
+
+            # Update the best found
+            if current_energy < best_energy:
+                best_x, best_energy = current_x, current_energy
+
+        # Cooling (temperature decrease)
+        temp *= cooling_rate
+
+        # Print progress every 50 steps
+        if i % 50 == 0:
+            print(f"Iter {i:3d}: Temp={temp:.3f}, Best x={best_x:.4f}, f(x)={best_energy:.4f}")
+
+    return best_x, best_energy
+
+
+# --- Run the algorithm ---
+bounds = [-10, 10]       # search space
+initial_temp = 1000      # initial temperature
+cooling_rate = 0.95      # cooling factor per iteration
+max_iterations = 500     # total iterations
+
+best_x, best_value = simulated_annealing(objective_function, bounds, initial_temp, cooling_rate, max_iterations)
+
+print("\n✅ Final best solution found:")
+print(f"x = {best_x:.4f}, f(x) = {best_value:.4f}")
