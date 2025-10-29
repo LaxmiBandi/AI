@@ -1,0 +1,67 @@
+# -------------------------------------------
+# Forward Chaining Example: Prove Robert is American
+# -------------------------------------------
+
+# Initial Facts
+facts = {
+    "Weapon(Missiles)",
+    "Sells(Robert, Missiles, A)",
+    "Enemy(A, America)",
+    "American(Robert)"
+}
+
+# Rules
+rules = [
+    "Hostile(X) :- Enemy(X, America).",
+    "Criminal(X) :- American(X), Weapon(Y), Sells(X, Y, Z), Hostile(Z)."
+]
+
+goal = "American(Robert)"
+derived = set()
+step = 1
+
+print("=== INITIAL FACTS ===")
+for f in facts:
+    print("-", f)
+print("======================\n")
+
+# Forward Chaining process
+new_fact = True
+while new_fact:
+    new_fact = False
+    for rule in rules:
+        head, body = rule.split(" :- ")
+        body_parts = body.strip(".").split(", ")
+
+        # Check if all facts in body are known
+        bindings = {}
+        matched = True
+        for part in body_parts:
+            found = False
+            for f in facts:
+                if f.split("(")[0] == part.split("(")[0]:
+                    found = True
+                    break
+            if not found:
+                matched = False
+                break
+
+        if matched:
+            new_fact_name = head.strip()
+            if new_fact_name not in facts:
+                facts.add(new_fact_name)
+                print(f"Step {step}: Using rule '{rule}' -> derived {new_fact_name}")
+                step += 1
+                new_fact = True
+
+print("\n=== FINAL FACTS ===")
+for f in facts:
+    print("-", f)
+
+print("\n=== CONCLUSION ===")
+if goal in facts:
+    print("✅ Therefore, Robert is AMERICAN (Proved by Forward Chaining).")
+else:
+    print("❌ Could not prove Robert is American.")
+
+
