@@ -1,0 +1,93 @@
+# ----------------------------------------------------
+# PROOF BY RESOLUTION — "John likes peanuts"
+# ----------------------------------------------------
+
+# Knowledge Base (KB)
+KB = {
+    "food": {"apple", "vegetables"},   # Apple & vegetables are food
+    "eats": {("anil", "peanuts")},     # Anil eats peanuts
+    "alive": {"anil"},                 # Anil is alive
+    "likes": set(),                    # Will be derived
+    "killed": set(),                   # Initially empty
+}
+
+# Step counter
+step = 1
+
+# ------------------------------
+# RULE DEFINITIONS (Inference)
+# ------------------------------
+
+def rule1_food_eaten_and_not_killed_is_food():
+    """If eats(x, y) and not killed(x), then food(y)."""
+    global step
+    new_food = set()
+    for x, y in KB["eats"]:
+        if x not in KB["killed"]:
+            if y not in KB["food"]:
+                new_food.add(y)
+                print(f"Step {step}: Since {x} eats {y} and {x} is not killed → {y} is food.")
+                step += 1
+    KB["food"].update(new_food)
+
+def rule2_alive_implies_not_killed():
+    """If alive(x), then not killed(x)."""
+    global step
+    for x in KB["alive"]:
+        if x not in KB["killed"]:
+            print(f"Step {step}: {x} is alive → {x} is not killed.")
+            step += 1
+            # (No actual change needed; consistency check)
+
+def rule3_not_killed_implies_alive():
+    """If not killed(x), then alive(x)."""
+    global step
+    for x, _ in KB["eats"]:
+        if x not in KB["alive"]:
+            KB["alive"].add(x)
+            print(f"Step {step}: {x} is not killed → {x} is alive.")
+            step += 1
+
+def rule4_john_likes_food():
+    """John likes everything that is food."""
+    global step
+    new_likes = set()
+    for item in KB["food"]:
+        if ("john", item) not in KB["likes"]:
+            new_likes.add(("john", item))
+            print(f"Step {step}: {item} is food → John likes {item}.")
+            step += 1
+    KB["likes"].update(new_likes)
+
+
+# ------------------------------
+# APPLY RULES (Resolution Steps)
+# ------------------------------
+
+print("=== Knowledge Base Initialization ===")
+for key, value in KB.items():
+    print(f"{key}: {value}")
+print("=====================================\n")
+
+# Run inference in a loop (simulate resolution)
+for _ in range(3):
+    rule1_food_eaten_and_not_killed_is_food()
+    rule2_alive_implies_not_killed()
+    rule3_not_killed_implies_alive()
+    rule4_john_likes_food()
+
+# ------------------------------
+# FINAL RESULT CHECK
+# ------------------------------
+
+goal = ("john", "peanuts")
+
+print("\n=== Final Knowledge Base ===")
+for key, value in KB.items():
+    print(f"{key}: {value}")
+
+print("\n=== Proof Conclusion ===")
+if goal in KB["likes"]:
+    print(f"✅ Therefore, John likes peanuts is TRUE.")
+else:
+    print(f"❌ Could not prove that John likes peanuts.")
